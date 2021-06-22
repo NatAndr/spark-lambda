@@ -13,10 +13,11 @@ object Dependencies extends DependencyBuilders with LibraryManagementSyntax {
 
   private val spark = Seq(
     "org.apache.spark" %% "spark-sql" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-streaming-kafka-0-10" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-streaming" % Versions.spark % "provided",
+    "org.apache.spark" %% "spark-sql-kafka-0-10" % Versions.spark % "provided"
+
     //    "org.apache.spark" %% "spark-core" % Versions.spark,
-    "org.apache.spark" %% "spark-streaming-kafka-0-10" % Versions.spark
-    //    "org.apache.spark" %% "spark-streaming" % Versions.spark //% "provided",
-    //    "org.apache.spark" % "spark-sql-kafka-0-10_2.12" % Versions.spark
     //    "org.apache.spark" %% "spark-sql" % Versions.spark % Test,
     //    "org.apache.spark" %% "spark-sql" % Versions.spark % Test classifier "tests",
     //    "org.apache.spark" %% "spark-core" % Versions.spark % Test classifier "tests"
