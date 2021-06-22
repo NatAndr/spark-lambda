@@ -29,23 +29,7 @@ lazy val commonSettings = Seq(
     case m if m.toLowerCase.endsWith("manifest.mf") => MergeStrategy.discard
     case m if m.toLowerCase.matches("meta-inf.*\\.sf$") => MergeStrategy.discard
     case "reference.conf" => MergeStrategy.concat
-    //      case PathList(xs @ _*) if xs.last == "UnusedStubClass.class" => MergeStrategy.first
-    //      case PathList("org", "apache", "spark", "spark-streaming-kafka-0-10_2.12", "UnusedStubClass.class") =>
-    //        println("1! ")
-    //        MergeStrategy.first
-    //      case PathList("org", "apache", "spark", "spark-tags_2.12", "UnusedStubClass.class") =>
-    //        println("2! ")
-    //        MergeStrategy.first
-    //      case PathList("org", "apache", "spark", "spark-token-provider-kafka-0-10_2.12", "UnusedStubClass.class") =>
-    //        println("3! ")
-    //        MergeStrategy.first
-    //      case PathList("org", "apache", "spark", "unused", "UnusedStubClass.class") =>
-    //        println("4! ")
-    //        MergeStrategy.first
-    case PathList("spark-streaming-kafka-0-10_2.12-3.1.0.jar", xs@_*) => MergeStrategy.last
-    case PathList("spark-tags_2.12-3.1.0.jar", xs@_*) => MergeStrategy.last
-    case PathList("spark-token-provider-kafka-0-10_2.12-3.1.0.jar", xs@_*) => MergeStrategy.last
-    case PathList("unused-1.0.0.jar", xs@_*) => MergeStrategy.last
+    case PathList("org", "apache", "spark", "UnusedStubClass.class") => MergeStrategy.last
     case _ => MergeStrategy.first
   },
 
