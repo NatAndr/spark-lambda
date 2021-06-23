@@ -5,5 +5,10 @@ case class AppConfig(
                       topic: String,
                       checkpointLocation: String,
                       analyticsConsumerAppName: String,
-                      structuredConsumerAppName: String
+                      structuredConsumerAppName: String,
+                      postgresUser: String,
+                      postgresDatabase: String,
+                      postgresPassword: String,
+                      postgresStreamTableTopTags: String,
+                      postgresStreamSchema: String
                     )
