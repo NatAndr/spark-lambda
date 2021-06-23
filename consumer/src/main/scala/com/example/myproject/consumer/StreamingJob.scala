@@ -1,15 +1,12 @@
 package com.example.myproject.consumer
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql.{Encoders, SparkSession}
+import org.apache.spark.sql.{Encoders, SaveMode, SparkSession}
 import pureconfig.generic.auto._
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import org.apache.spark.streaming.kafka010._
-import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
-import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
+import java.util.Properties
 
 object StreamingJob extends App with LazyLogging {
   val config: AppConfig = pureconfig.loadConfigOrThrow[AppConfig]
@@ -26,24 +23,11 @@ object StreamingJob extends App with LazyLogging {
   spark.sparkContext.setLogLevel("WARN")
 
   val sc = spark.sparkContext
-  val ssc = new StreamingContext(sc, Seconds(5))
+  val ssc: StreamingContext = new StreamingContext(sc, Seconds(5))
   val topics = Array(config.topic)
   ssc.checkpoint("/spark")
 
-  val kafkaParams = Map[String, Object](
-    "bootstrap.servers" -> config.bootstrapServers,
-    "key.deserializer" -> classOf[StringDeserializer],
-    "value.deserializer" -> classOf[StringDeserializer],
-    "group.id" -> "group1",
-    "auto.offset.reset" -> "latest",
-    "enable.auto.commit" -> (false: java.lang.Boolean)
-  )
-
-  val directKafkaStream: InputDStream[ConsumerRecord[String, String]] = KafkaUtils.createDirectStream[String, String](
-    ssc,
-    PreferConsistent,
-    Subscribe[String, String](topics, kafkaParams)
-  )
+  val directKafkaStream: InputDStream[ConsumerRecord[String, String]] = KafkaStreamUtils.init(ssc)
 
   val transformed: DStream[(String, Int)] = directKafkaStream.transform { rdd =>
     val schema = Encoders.product[YouTubeRecord].schema
@@ -65,20 +49,26 @@ object StreamingJob extends App with LazyLogging {
     }
   }
 
-  // Now count them up over a 5 minute window sliding every 10 seconds
   val tagCounts = transformed.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(60 * 5), Seconds(10))
 
-  // Sort the results by the count values
-  val sortedResults = tagCounts.transform(
-    rdd => rdd
-      .sortBy(x => x._2, ascending = false)
-      .toDF()
-      .limit(5)
-      .rdd
+  val sortedResults = tagCounts.transform(rdd => {
+    val list = rdd.sortBy(-_._2).take(5)
+    rdd.filter(list.contains)
+  }
   )
 
-  // Print top 10
-  sortedResults.print
+  val connectionProperties: Properties = JdbcUtils.getConnectionProperties
+  val jdbcUrl = s"jdbc:postgresql://postgres:5432/${config.postgresDatabase}"
+
+  tagCounts.foreachRDD { rdd =>
+    rdd
+      .toDF("tags", "count").selectExpr("*", "CURRENT_TIMESTAMP() as created_at")
+      .write
+      .mode(SaveMode.Append)
+      .jdbc(jdbcUrl, s"${config.postgresStreamSchema}.${config.postgresStreamTableTopTags}", connectionProperties)
+
+    logger.warn("New chunk of data saved to postgres")
+  }
 
   ssc.start()
   ssc.awaitTermination()
