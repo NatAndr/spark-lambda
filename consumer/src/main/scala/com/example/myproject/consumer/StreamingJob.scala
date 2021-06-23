@@ -69,7 +69,13 @@ object StreamingJob extends App with LazyLogging {
   val tagCounts = transformed.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(60 * 5), Seconds(10))
 
   // Sort the results by the count values
-  val sortedResults = tagCounts.transform(rdd => rdd.sortBy(x => x._2, ascending = false))
+  val sortedResults = tagCounts.transform(
+    rdd => rdd
+      .sortBy(x => x._2, ascending = false)
+      .toDF()
+      .limit(5)
+      .rdd
+  )
 
   // Print top 10
   sortedResults.print
