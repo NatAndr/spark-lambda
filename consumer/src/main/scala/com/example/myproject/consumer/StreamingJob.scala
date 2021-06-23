@@ -1,7 +1,7 @@
 package com.example.myproject.consumer
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Encoders, SparkSession}
 import pureconfig.generic.auto._
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -46,7 +46,10 @@ object StreamingJob extends App with LazyLogging {
   )
 
   val transformed: DStream[(String, Int)] = directKafkaStream.transform { rdd =>
-    val df = spark.read.json(rdd.map(x => x.value))
+    val schema = Encoders.product[YouTubeRecord].schema
+    val df = spark.read
+      .schema(schema)
+      .json(rdd.map(x => x.value))
 
     if (df.columns.nonEmpty) {
       df.as[YouTubeRecord]
