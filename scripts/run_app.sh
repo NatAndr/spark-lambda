@@ -8,5 +8,3 @@ ${SPARK_HOME}/bin/spark-submit \
         --jars ${SPARK_HOME}/jars/spark-streaming-kafka-0-10_2.12-${SPARK_VERSION}.jar \
         ./build/consumer.jar
 
-
-java -jar ./build/provider.jar
