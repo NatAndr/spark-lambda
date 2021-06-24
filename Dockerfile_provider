@@ -1,6 +1,7 @@
 FROM openjdk:8-jdk-alpine
 
 COPY /build ./build
+COPY /data ./data
 
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
 
