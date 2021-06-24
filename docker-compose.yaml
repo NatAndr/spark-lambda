@@ -2,17 +2,15 @@ version: '3'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0
-    hostname: zookeeper
+    container_name: zookeeper
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
     ports:
-      - 22181:2181
-    networks:
-      - default_net
+      - 2181:2181
   kafka:
     image: confluentinc/cp-kafka:5.5.0
-    hostname: kafka
+    container_name: kafka
     depends_on:
       - zookeeper
     ports:
@@ -22,10 +20,8 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-    networks:
-      - default_net
-
   postgres:
     #    image: postgres
     container_name: postgres
@@ -37,8 +33,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
-    networks:
-      - default_net
   provider:
     container_name: provider
     build:
@@ -59,8 +53,3 @@ services:
       - 8081:8081 # Worker
       - 4040:4040 # Driver
       - 9870:9870 # Hadoop Site
-    networks:
-      - default_net
-
-networks:
-  default_net:
