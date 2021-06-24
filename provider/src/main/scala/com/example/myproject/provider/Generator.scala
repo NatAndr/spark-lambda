@@ -15,7 +15,7 @@ object Generator extends App with StrictLogging {
   val producer = Producer.init
   producer.flush()
   Producer.createTopic(config.topic, config.partitions, config.replication)
-  Thread.sleep(3000)
+  Thread.sleep(5000)
 
   logger.info("Kafka producer initialized")
 
@@ -30,7 +30,7 @@ object Generator extends App with StrictLogging {
         val data = new ProducerRecord[String, String](config.topic, record.asJson.toString())
         producer.send(data)
         count += 1
-        Thread.sleep(1000)
+        Thread.sleep(500)
       } catch {
         case e: Exception => //logger.error("Exception: " + e.getMessage)
       }
