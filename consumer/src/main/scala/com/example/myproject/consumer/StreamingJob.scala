@@ -14,7 +14,7 @@ object StreamingJob extends App with LazyLogging {
   val config: AppConfig = pureconfig.loadConfigOrThrow[AppConfig]
 
   val spark: SparkSession = SparkSession.builder()
-    .appName(config.structuredConsumerAppName)
+    .appName(config.streamingConsumerAppName)
     //    .config("spark.driver.memory", "3g")
     .master("local[*]")
     .getOrCreate()
@@ -75,7 +75,7 @@ object StreamingJob extends App with LazyLogging {
       .mode(SaveMode.Append)
       .jdbc(jdbcUrl, config.postgresStreamTable, connectionProperties)
 
-    logger.warn("New chunk of data saved to postgres")
+    logger.warn(s"New chunk of data saved to ${config.postgresStreamTable}")
   }
 
   ssc.start()
