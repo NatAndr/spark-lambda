@@ -4,11 +4,12 @@ case class AppConfig(
                       bootstrapServers: String,
                       topic: String,
                       checkpointLocation: String,
-                      analyticsConsumerAppName: String,
-                      structuredConsumerAppName: String,
+                      batchConsumerAppName: String,
+                      streamingConsumerAppName: String,
                       postgresUser: String,
                       postgresDatabase: String,
                       postgresPassword: String,
                       postgresStreamTable: String,
+                      postgresBatchTable: String,
                       topCount: Int
                     )
