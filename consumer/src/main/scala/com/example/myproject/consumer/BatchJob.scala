@@ -1,9 +1,12 @@
 package com.example.myproject.consumer
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object Main {
+object BatchJob extends App with LazyLogging {
+  val config: AppConfig = pureconfig.loadConfigOrThrow[AppConfig]
+
   val spark: SparkSession = SparkSession
     .builder()
     .appName("Demo")
