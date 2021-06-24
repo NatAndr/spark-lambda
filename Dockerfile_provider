@@ -1,0 +1,7 @@
+FROM openjdk:8-jdk-alpine
+
+COPY /build ./build
+
+ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
+
+ENTRYPOINT ["java", "-jar", "./build/provider.jar"]

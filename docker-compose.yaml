@@ -1,20 +1,8 @@
 version: '3'
 services:
-  spark:
-    container_name: spark
-    depends_on:
-      - kafka
-    build:
-      context: .
-    ports:
-      - 8080:8080 # Master
-      - 8081:8081 # Worker
-      - 4040:4040 # Driver
-      - 9870:9870 # Hadoop Site
-    networks:
-      - default_net
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:5.5.0
+    hostname: zookeeper
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
@@ -23,7 +11,8 @@ services:
     networks:
       - default_net
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:5.5.0
+    hostname: kafka
     depends_on:
       - zookeeper
     ports:
@@ -33,21 +22,45 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
     networks:
       - default_net
+
   postgres:
-    image: postgres
+    #    image: postgres
     container_name: postgres
+    build:
+      context: .
+      dockerfile: Dockerfile_postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - default_net
+  provider:
+    container_name: provider
+    build:
+      context: .
+      dockerfile: Dockerfile_provider
+    depends_on:
+      - kafka
+  spark:
+    container_name: spark
+    depends_on:
+      - kafka
+      - provider
+      - postgres
+    build:
+      context: .
+    ports:
+      - 8080:8080 # Master
+      - 8081:8081 # Worker
+      - 4040:4040 # Driver
+      - 9870:9870 # Hadoop Site
+    networks:
+      - default_net
+
 networks:
   default_net:
