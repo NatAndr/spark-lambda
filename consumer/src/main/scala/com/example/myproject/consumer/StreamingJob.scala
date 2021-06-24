@@ -4,8 +4,10 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.{Encoders, SaveMode, SparkSession}
 import pureconfig.generic.auto._
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+
 import java.util.Properties
 
 object StreamingJob extends App with LazyLogging {
@@ -52,7 +54,7 @@ object StreamingJob extends App with LazyLogging {
   val tagCounts = transformed.reduceByKeyAndWindow((x, y) => x + y, (x, y) => x - y, Seconds(60 * 5), Seconds(10))
 
   val sortedResults = tagCounts.transform(rdd => {
-    val list = rdd.sortBy(-_._2).take(5)
+    val list = rdd.sortBy(-_._2).take(config.topCount)
     rdd.filter(list.contains)
   }
   )
@@ -60,12 +62,18 @@ object StreamingJob extends App with LazyLogging {
   val connectionProperties: Properties = JdbcUtils.getConnectionProperties
   val jdbcUrl = s"jdbc:postgresql://postgres:5432/${config.postgresDatabase}"
 
-  tagCounts.foreachRDD { rdd =>
-    rdd
-      .toDF("tags", "count").selectExpr("*", "CURRENT_TIMESTAMP() as created_at")
+  sortedResults.foreachRDD { rdd =>
+    val result = rdd
+      .toDF("tags", "count")
+      .select(
+        col("tags").as("tag"),
+        col("count"),
+        expr("CURRENT_TIMESTAMP()").as("created_at")
+      )
+    result
       .write
       .mode(SaveMode.Append)
-      .jdbc(jdbcUrl, s"${config.postgresStreamSchema}.${config.postgresStreamTableTopTags}", connectionProperties)
+      .jdbc(jdbcUrl, config.postgresStreamTable, connectionProperties)
 
     logger.warn("New chunk of data saved to postgres")
   }

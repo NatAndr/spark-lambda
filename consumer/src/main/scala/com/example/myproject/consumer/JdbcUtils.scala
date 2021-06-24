@@ -12,7 +12,7 @@ object JdbcUtils {
     connectionProperties.put("user", config.postgresUser)
     connectionProperties.put("password", config.postgresPassword)
     connectionProperties.put("driver", "org.postgresql.Driver")
-    connectionProperties.put("dbtable", s"${config.postgresStreamSchema}.${config.postgresStreamTableTopTags}")
+    connectionProperties.put("dbtable", config.postgresStreamTable)
 
     connectionProperties
   }

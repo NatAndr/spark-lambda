@@ -7,7 +7,7 @@ DATABASE youtube;
 CREATE SCHEMA stream;
 CREATE TABLE if not exists stream.top_tags
 (
-    tags       varchar,
+    tag        varchar,
     count      int,
     created_at timestamp with time zone
 );

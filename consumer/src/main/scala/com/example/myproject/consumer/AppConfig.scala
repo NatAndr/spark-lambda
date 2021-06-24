@@ -9,6 +9,6 @@ case class AppConfig(
                       postgresUser: String,
                       postgresDatabase: String,
                       postgresPassword: String,
-                      postgresStreamTableTopTags: String,
-                      postgresStreamSchema: String
+                      postgresStreamTable: String,
+                      topCount: Int
                     )
