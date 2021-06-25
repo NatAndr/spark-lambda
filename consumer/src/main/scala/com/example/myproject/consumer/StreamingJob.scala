@@ -21,7 +21,7 @@ object StreamingJob extends App with LazyLogging {
 
   import spark.implicits._
 
-  logger.info("Initializing Structured consumer")
+  logger.info("Streaming job starting")
   spark.sparkContext.setLogLevel("WARN")
 
   val sc = spark.sparkContext
