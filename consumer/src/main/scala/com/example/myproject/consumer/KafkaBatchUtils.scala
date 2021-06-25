@@ -15,6 +15,8 @@ object KafkaBatchUtils {
     val properties = new Properties()
     properties.put("bootstrap.servers", config.bootstrapServers)
     properties.put("group.id", "group2")
+    properties.put("enable.auto.commit", "true")
+    properties.put("auto.commit.interval.ms", "1000")
 
     new KafkaConsumer(properties, new StringDeserializer, new StringDeserializer)
   }
