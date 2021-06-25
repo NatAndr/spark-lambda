@@ -6,7 +6,7 @@ object Dependencies extends DependencyBuilders with LibraryManagementSyntax {
     val spark = "3.1.0"
     val postgres = "42.2.2"
     //    val scalaTestVersion = "3.2.1"
-    val circe = "0.12.3"
+    val circe = "0.14.1"
     val log4j = "2.4.1"
     val kafka = "2.8.0"
   }
@@ -39,7 +39,8 @@ object Dependencies extends DependencyBuilders with LibraryManagementSyntax {
   private val circle = Seq(
     "io.circe" %% "circe-core" % Versions.circe,
     "io.circe" %% "circe-generic" % Versions.circe,
-    "io.circe" %% "circe-parser" % Versions.circe
+    "io.circe" %% "circe-parser" % Versions.circe,
+    "io.circe" %% "circe-generic-extras" % Versions.circe
   )
 
   private val commons = Seq(
